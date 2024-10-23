@@ -10,7 +10,7 @@ export default function Home() {
 
     const { loginWithGoogle } = await graphQLClient.request(LoginWithGoogleQuery, { token: googleToken || "" })
 
-    console.log("you log in");
+    console.log("you log in", loginWithGoogle);
     
     alert("you log in")
   }, [])
