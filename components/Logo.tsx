@@ -16,7 +16,7 @@ function Logo() {
     >
       <SwitchCamera className="h-6 w-6 shrink-0 lg:hidden" />
       <p
-        className={`font-semibold text-xl hidden lg:block`}
+        className={`font-semibold text-xl hidden lg:block `}
       >
         MellowMoments
       </p>
