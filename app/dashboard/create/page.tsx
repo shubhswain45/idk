@@ -82,7 +82,7 @@ function CreatePage() {
                 <FormField
                   control={form.control}
                   name="fileUrl"
-                  render={(b) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel htmlFor="picture">Picture</FormLabel>
                       <FormControl>

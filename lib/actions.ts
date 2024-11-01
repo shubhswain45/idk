@@ -19,6 +19,7 @@ import { prisma } from "./prisma";
 
 export async function createPost(values: z.infer<typeof CreatePost>) {
   const userId = await getUserId();
+
   const validatedFields = CreatePost.safeParse(values);
 
   if (!validatedFields.success) {
@@ -35,11 +36,18 @@ export async function createPost(values: z.infer<typeof CreatePost>) {
       data: {
         caption,
         fileUrl,
-        user: { connect: { id: userId } },
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
   } catch (error) {
-    return { message: "Database Error: Failed to Create Post." };
+    console.error("Error creating post:", error);
+    return {
+      message: "Database Error: Failed to Create Post.",
+    };
   }
 
   revalidatePath("/dashboard");
@@ -48,22 +56,39 @@ export async function createPost(values: z.infer<typeof CreatePost>) {
 
 export async function deletePost(formData: FormData) {
   const userId = await getUserId();
-  const { id } = DeletePost.parse({ id: formData.get("id") });
 
-  const post = await prisma.post.findUnique({ where: { id, userId } });
-  if (!post) throw new Error("Post not found");
+  const { id } = DeletePost.parse({
+    id: formData.get("id"),
+  });
+
+  const post = await prisma.post.findUnique({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
 
   try {
-    await prisma.post.delete({ where: { id } });
+    await prisma.post.delete({
+      where: {
+        id,
+      },
+    });
     revalidatePath("/dashboard");
     return { message: "Deleted Post." };
   } catch (error) {
+    console.error("Error deleting post:", error);
     return { message: "Database Error: Failed to Delete Post." };
   }
 }
 
 export async function likePost(value: FormDataEntryValue | null) {
   const userId = await getUserId();
+
   const validatedFields = LikeSchema.safeParse({ postId: value });
 
   if (!validatedFields.success) {
@@ -74,32 +99,62 @@ export async function likePost(value: FormDataEntryValue | null) {
   }
 
   const { postId } = validatedFields.data;
-  const post = await prisma.post.findUnique({ where: { id: postId } });
-  if (!post) throw new Error("Post not found");
 
-  const like = await prisma.like.findUnique({
-    where: { postId_userId: { postId, userId } },
+  const post = await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
   });
 
-  try {
-    if (like) {
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const like = await prisma.like.findUnique({
+    where: {
+      postId_userId: {
+        postId,
+        userId,
+      },
+    },
+  });
+
+  if (like) {
+    try {
       await prisma.like.delete({
-        where: { postId_userId: { postId, userId } },
+        where: {
+          postId_userId: {
+            postId,
+            userId,
+          },
+        },
       });
       revalidatePath("/dashboard");
       return { message: "Unliked Post." };
-    } else {
-      await prisma.like.create({ data: { postId, userId } });
-      revalidatePath("/dashboard");
-      return { message: "Liked Post." };
+    } catch (error) {
+      console.error("Error unliking post:", error);
+      return { message: "Database Error: Failed to Unlike Post." };
     }
+  }
+
+  try {
+    await prisma.like.create({
+      data: {
+        postId,
+        userId,
+      },
+    });
+    revalidatePath("/dashboard");
+    return { message: "Liked Post." };
   } catch (error) {
-    return { message: "Database Error: Failed to update like status." };
+    console.error("Error liking post:", error);
+    return { message: "Database Error: Failed to Like Post." };
   }
 }
 
 export async function bookmarkPost(value: FormDataEntryValue | null) {
   const userId = await getUserId();
+
   const validatedFields = BookmarkSchema.safeParse({ postId: value });
 
   if (!validatedFields.success) {
@@ -110,32 +165,66 @@ export async function bookmarkPost(value: FormDataEntryValue | null) {
   }
 
   const { postId } = validatedFields.data;
-  const post = await prisma.post.findUnique({ where: { id: postId } });
-  if (!post) throw new Error("Post not found.");
 
-  const bookmark = await prisma.savedPost.findUnique({
-    where: { postId_userId: { postId, userId } },
+  const post = await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
   });
 
-  try {
-    if (bookmark) {
+  if (!post) {
+    throw new Error("Post not found.");
+  }
+
+  const bookmark = await prisma.savedPost.findUnique({
+    where: {
+      postId_userId: {
+        postId,
+        userId,
+      },
+    },
+  });
+
+  if (bookmark) {
+    try {
       await prisma.savedPost.delete({
-        where: { postId_userId: { postId, userId } },
+        where: {
+          postId_userId: {
+            postId,
+            userId,
+          },
+        },
       });
       revalidatePath("/dashboard");
       return { message: "Unbookmarked Post." };
-    } else {
-      await prisma.savedPost.create({ data: { postId, userId } });
-      revalidatePath("/dashboard");
-      return { message: "Bookmarked Post." };
+    } catch (error) {
+      console.error("Error unbookmarking post:", error);
+      return {
+        message: "Database Error: Failed to Unbookmark Post.",
+      };
     }
+  }
+
+  try {
+    await prisma.savedPost.create({
+      data: {
+        postId,
+        userId,
+      },
+    });
+    revalidatePath("/dashboard");
+    return { message: "Bookmarked Post." };
   } catch (error) {
-    return { message: "Database Error: Failed to update bookmark status." };
+    console.error("Error bookmarking post:", error);
+    return {
+      message: "Database Error: Failed to Bookmark Post.",
+    };
   }
 }
 
 export async function createComment(values: z.infer<typeof CreateComment>) {
   const userId = await getUserId();
+
   const validatedFields = CreateComment.safeParse(values);
 
   if (!validatedFields.success) {
@@ -146,38 +235,68 @@ export async function createComment(values: z.infer<typeof CreateComment>) {
   }
 
   const { postId, body } = validatedFields.data;
-  const post = await prisma.post.findUnique({ where: { id: postId } });
-  if (!post) throw new Error("Post not found");
+
+  const post = await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
 
   try {
     await prisma.comment.create({
-      data: { body, postId, userId },
+      data: {
+        body,
+        postId,
+        userId,
+      },
     });
     revalidatePath("/dashboard");
     return { message: "Created Comment." };
   } catch (error) {
+    console.error("Error creating comment:", error);
     return { message: "Database Error: Failed to Create Comment." };
   }
 }
 
 export async function deleteComment(formData: FormData) {
   const userId = await getUserId();
-  const { id } = DeleteComment.parse({ id: formData.get("id") });
 
-  const comment = await prisma.comment.findUnique({ where: { id, userId } });
-  if (!comment) throw new Error("Comment not found");
+  const { id } = DeleteComment.parse({
+    id: formData.get("id"),
+  });
+
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!comment) {
+    throw new Error("Comment not found");
+  }
 
   try {
-    await prisma.comment.delete({ where: { id } });
+    await prisma.comment.delete({
+      where: {
+        id,
+      },
+    });
     revalidatePath("/dashboard");
     return { message: "Deleted Comment." };
   } catch (error) {
+    console.error("Error deleting comment:", error);
     return { message: "Database Error: Failed to Delete Comment." };
   }
 }
 
 export async function updatePost(values: z.infer<typeof UpdatePost>) {
   const userId = await getUserId();
+
   const validatedFields = UpdatePost.safeParse(values);
 
   if (!validatedFields.success) {
@@ -188,12 +307,30 @@ export async function updatePost(values: z.infer<typeof UpdatePost>) {
   }
 
   const { id, fileUrl, caption } = validatedFields.data;
-  const post = await prisma.post.findUnique({ where: { id, userId } });
-  if (!post) throw new Error("Post not found");
+
+  const post = await prisma.post.findUnique({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
 
   try {
-    await prisma.post.update({ where: { id }, data: { fileUrl, caption } });
+    await prisma.post.update({
+      where: {
+        id,
+      },
+      data: {
+        fileUrl,
+        caption,
+      },
+    });
   } catch (error) {
+    console.error("Error updating post:", error);
     return { message: "Database Error: Failed to Update Post." };
   }
 
@@ -203,6 +340,7 @@ export async function updatePost(values: z.infer<typeof UpdatePost>) {
 
 export async function updateProfile(values: z.infer<typeof UpdateUser>) {
   const userId = await getUserId();
+
   const validatedFields = UpdateUser.safeParse(values);
 
   if (!validatedFields.success) {
@@ -216,42 +354,81 @@ export async function updateProfile(values: z.infer<typeof UpdateUser>) {
 
   try {
     await prisma.user.update({
-      where: { id: userId },
-      data: { username, name, image, bio, gender, website },
+      where: {
+        id: userId,
+      },
+      data: {
+        username,
+        name,
+        image,
+        bio,
+        gender,
+        website,
+      },
     });
     revalidatePath("/dashboard");
     return { message: "Updated Profile." };
   } catch (error) {
+    console.error("Error updating profile:", error);
     return { message: "Database Error: Failed to Update Profile." };
   }
 }
 
 export async function followUser(formData: FormData) {
   const userId = await getUserId();
-  const { id } = FollowUser.parse({ id: formData.get("id") });
 
-  const user = await prisma.user.findUnique({ where: { id } });
-  if (!user) throw new Error("User not found");
-
-  const follows = await prisma.follows.findUnique({
-    where: { followerId_followingId: { followerId: userId, followingId: id } },
+  const { id } = FollowUser.parse({
+    id: formData.get("id"),
   });
 
-  try {
-    if (follows) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const follows = await prisma.follows.findUnique({
+    where: {
+      followerId_followingId: {
+        followerId: userId,
+        followingId: id,
+      },
+    },
+  });
+
+  if (follows) {
+    try {
       await prisma.follows.delete({
-        where: { followerId_followingId: { followerId: userId, followingId: id } },
+        where: {
+          followerId_followingId: {
+            followerId: userId,
+            followingId: id,
+          },
+        },
       });
       revalidatePath("/dashboard");
       return { message: "Unfollowed User." };
-    } else {
-      await prisma.follows.create({
-        data: { followerId: userId, followingId: id },
-      });
-      revalidatePath("/dashboard");
-      return { message: "Followed User." };
+    } catch (error) {
+      console.error("Error unfollowing user:", error);
+      return { message: "Database Error: Failed to Unfollow User." };
     }
+  }
+
+  try {
+    await prisma.follows.create({
+      data: {
+        followerId: userId,
+        followingId: id,
+      },
+    });
+    revalidatePath("/dashboard");
+    return { message: "Followed User." };
   } catch (error) {
-    return { message: "Database Error: Failed to update follow status." };
+    console.error("Error following user:", error);
+    return { message: "Database Error: Failed to Follow User." };
   }
 }

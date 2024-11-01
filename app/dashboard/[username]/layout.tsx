@@ -9,7 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { fetchProfile } from "@/lib/data";
 import { Follows } from "@prisma/client";
 import { MoreHorizontal, Settings } from "lucide-react";
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 

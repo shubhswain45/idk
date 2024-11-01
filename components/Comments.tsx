@@ -34,17 +34,19 @@ function Comments({
       postId,
     },
   });
-  let [isPending, startTransition] = useTransition();
+
   const [optimisticComments, addOptimisticComment] = useOptimistic<
     CommentWithExtras[]
   >(
     comments,
-    // @ts-ignore
+    // Replace @ts-ignore with @ts-expect-error
+    // @ts-expect-error
     (state: Comment[], newComment: string) => [
       { body: newComment, userId: user?.id, postId, user },
       ...state,
     ]
   );
+
   const body = form.watch("body");
   const commentsCount = optimisticComments.length;
 
@@ -80,9 +82,7 @@ function Comments({
           onSubmit={form.handleSubmit(async (values) => {
             const valuesCopy = { ...values };
             form.reset();
-            startTransition(() => {
               addOptimisticComment(valuesCopy.body);
-            });
 
             await createComment(valuesCopy);
           })}
