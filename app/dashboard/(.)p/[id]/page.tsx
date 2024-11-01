@@ -8,16 +8,14 @@ type Props = {
   };
 };
 
-async function PostModal({ params }: Props) {
-  const { id } = params; // No need to await params
-
+async function PostModal({ params: { id } }: Props) {
   const post = await fetchPostById(id);
 
   if (!post) {
     notFound();
   }
 
-  return <PostView id={id} post={post}/>; // Render the post title
+  return <PostView id={id} post={post} />;
 }
 
 export default PostModal;
