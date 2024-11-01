@@ -1,3 +1,4 @@
+"use client"
 import PostView from "@/components/PostView";
 import { fetchPostById } from "@/lib/data";
 import { notFound, useParams } from "next/navigation";
