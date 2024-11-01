@@ -3,7 +3,7 @@ import PostView from "@/components/PostView";
 import { fetchPostById } from "@/lib/data";
 import { notFound, useParams } from "next/navigation";
 
-async function PostModal() {
+function PostModal() {
   const { id } = useParams();
 
   // Check if id is valid and is a string
