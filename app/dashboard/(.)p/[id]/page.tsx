@@ -1,4 +1,3 @@
-// import PostView from "@/components/PostView";
 import PostView from "@/components/PostView";
 import { fetchPostById } from "@/lib/data";
 import { notFound } from "next/navigation";
@@ -10,8 +9,7 @@ type Props = {
 };
 
 async function PostModal({ params }: Props) {
-  // Await params here
-  const { id } = await params;
+  const { id } = params; // No need to await params
 
   const post = await fetchPostById(id);
 
@@ -19,7 +17,7 @@ async function PostModal({ params }: Props) {
     notFound();
   }
 
-  return <PostView id={id} post={post}/>; // Example: Render the post title
+  return <PostView id={id} post={post}/>; // Render the post title
 }
 
 export default PostModal;
