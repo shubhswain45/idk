@@ -6,13 +6,11 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
     FormControl,
     FormField,
     FormItem,
-    FormMessage,
 } from "@/components/ui/form";
 import useMount from "@/hooks/useMount";
 import { UserWithExtras } from "@/lib/definitions";
@@ -84,7 +82,7 @@ function ProfileAvatar({
                                 <FormField
                                     control={form.control}
                                     name="image"
-                                    render={({ field }) => (
+                                    render={() => (
                                         <FormItem>
                                             <FormControl>
                                                 <UploadButton

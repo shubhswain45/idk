@@ -26,7 +26,6 @@ import { UploadButton } from "@/lib/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -83,7 +82,7 @@ function CreatePage() {
                 <FormField
                   control={form.control}
                   name="fileUrl"
-                  render={({ field, fieldState }) => (
+                  render={(b) => (
                     <FormItem>
                       <FormLabel htmlFor="picture">Picture</FormLabel>
                       <FormControl>

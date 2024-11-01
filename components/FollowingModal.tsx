@@ -9,7 +9,6 @@ import {
 import useMount from "@/hooks/useMount";
 import { FollowingWithExtras } from "@/lib/definitions";
 import { usePathname, useRouter } from "next/navigation";
-import UserAvatar from "./UserAvatar";
 import { ScrollArea } from "./ui/scroll-area";
 import Following from "./Following";
 

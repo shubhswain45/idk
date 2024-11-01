@@ -18,7 +18,7 @@ function Comment({ comment, inputRef }: Props) {
   const href = `/dashboard/${username}`;
 
   return (
-    <div className="group p-3 px-3.5  flex items-start space-x-2.5">
+    <div className="group p-3 px-3.5 flex items-start space-x-2.5">
       <Link href={href}>
         <UserAvatar user={comment.user} />
       </Link>

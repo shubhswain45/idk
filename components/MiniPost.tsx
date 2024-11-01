@@ -10,7 +10,7 @@ import Timestamp from "./ui/Timestamp";
 function MiniPost({ post }: { post: PostWithExtras }) {
   const username = post.user.username;
   const href = `/dashboard/${username}`;
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const user = session?.user;
 
   if (!user) return null;

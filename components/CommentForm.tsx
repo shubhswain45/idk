@@ -18,11 +18,9 @@ import { z } from "zod";
 function CommentForm({
   postId,
   className,
-  inputRef,
 }: {
   postId: string;
   className?: string;
-  inputRef?: React.Ref<HTMLInputElement>;
 }) {
   const form = useForm<z.infer<typeof CreateComment>>({
     resolver: zodResolver(CreateComment),

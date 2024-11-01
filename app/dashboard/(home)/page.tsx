@@ -1,6 +1,5 @@
 // DashboardPage.tsx
 import { PostSkeleton } from "@/components/Skeletons";
-import { UploadButton } from "@/lib/uploadthing";
 import React, { Suspense } from "react";
 
 // Lazy load the Posts component

@@ -7,6 +7,7 @@ import ProfileTabs from "@/components/ProfileTabs";
 import UserAvatar from "@/components/UserAvatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { fetchProfile } from "@/lib/data";
+import { Follows } from "@prisma/client";
 import { MoreHorizontal, Settings } from "lucide-react";
 import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
@@ -21,7 +22,6 @@ type Props = {
 
 export async function generateMetadata(
   { params }: Props,
-  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const username = params.username;
 
@@ -38,7 +38,7 @@ async function ProfileLayout({ children, params: { username } }: Props) {
   const isCurrentUser = session?.user.id === profile?.id;
   //   the followerId here is the id of the user who is following the profile
   const isFollowing = profile?.followedBy.some(
-    (user) => user.followerId === session?.user.id
+    (user: Follows) => user.followerId === session?.user.id
   );
 
   if (!profile) {

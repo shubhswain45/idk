@@ -1,14 +1,12 @@
 "use client";
 
 import PostActions from "@/components/PostActions";
-import UserAvatar from "@/components/UserAvatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"; // Import DialogTitle
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useMount from "@/hooks/useMount";
 import { PostWithExtras } from "@/lib/definitions";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
 import MiniPost from "./MiniPost";
@@ -23,8 +21,6 @@ function PostView({ id, post }: { id: string; post: PostWithExtras }) {
   const { data: session } = useSession();
   const user = session?.user;
   const inputRef = useRef<HTMLInputElement>(null);
-  const username = post.user.username;
-  const href = `/dashboard/${username}`;
   const mount = useMount();
 
   if (!mount) return null;
@@ -32,21 +28,18 @@ function PostView({ id, post }: { id: string; post: PostWithExtras }) {
   return (
     <Dialog open={isPostModal} onOpenChange={(open) => !open && router.back()}>
       <DialogContent className="flex gap-0 flex-col md:flex-row items-start p-0 md:max-w-3xl lg:max-w-5xl xl:max-w-6xl h-full max-h-[500px] lg:max-h-[700px] xl:max-h-[800px]">
-
         <div className="flex flex-col justify-between md:h-full md:order-2 w-full max-w-md">
           <ScrollArea className="hidden md:inline border-b flex-1 py-1.5">
             <MiniPost post={post} />
             {post.comments.length > 0 && (
               <>
-                {post.comments.map((comment) => {
-                  return (
-                    <Comment
-                      key={comment.id}
-                      comment={comment}
-                      inputRef={inputRef}
-                    />
-                  );
-                })}
+                {post.comments.map((comment) => (
+                  <Comment
+                    key={comment.id}
+                    comment={comment}
+                    inputRef={inputRef}
+                  />
+                ))}
               </>
             )}
           </ScrollArea>
@@ -62,11 +55,7 @@ function PostView({ id, post }: { id: string; post: PostWithExtras }) {
               })}
             </time>
           </div>
-          <CommentForm
-            postId={id}
-            className="hidden md:inline-flex"
-            inputRef={inputRef}
-          />
+          <CommentForm postId={id} className="hidden md:inline-flex" />
         </div>
 
         <div className="relative overflow-hidden h-96 md:h-[500px] lg:h-[700px] xl:h-[800px] max-w-3xl w-full">
@@ -84,7 +73,7 @@ function PostView({ id, post }: { id: string; post: PostWithExtras }) {
           userId={user?.id}
           className="md:hidden border-b p-2.5"
         />
-        <CommentForm postId={id} className="md:hidden" inputRef={inputRef} />
+        <CommentForm postId={id} className="md:hidden" />
         <ViewPost className="md:hidden" />
       </DialogContent>
     </Dialog>

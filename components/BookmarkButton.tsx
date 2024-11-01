@@ -16,14 +16,15 @@ type Props = {
 function BookmarkButton({ post, userId }: Props) {
   const predicate = (bookmark: SavedPost) =>
     bookmark.userId === userId && bookmark.postId === post.id;
+
   const [optimisticBookmarks, addOptimisticBookmark] = useOptimistic<
     SavedPost[]
   >(
     post.savedBy,
-    // @ts-ignore
+    // @ts-expect-error: Type mismatch between `state` and `newBookmark` handling
     (state: SavedPost[], newBookmark: SavedPost) =>
       state.find(predicate)
-        ? //   here we check if the bookmark already exists, if it does, we remove it, if it doesn't, we add it
+        ? // If the bookmark already exists, remove it; otherwise, add it
           state.filter((bookmark) => bookmark.userId !== userId)
         : [...state, newBookmark]
   );
@@ -31,8 +32,8 @@ function BookmarkButton({ post, userId }: Props) {
   return (
     <form
       action={async (formData: FormData) => {
-        const postId = formData.get("postId");
-        addOptimisticBookmark({ postId, userId });
+        const postId = formData.get("postId") as string;
+        addOptimisticBookmark({ postId, userId } as SavedPost);
         await bookmarkPost(postId);
       }}
       className="ml-auto"

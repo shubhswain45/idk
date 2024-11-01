@@ -1,5 +1,5 @@
 import { unstable_noStore as noStore } from "next/cache";
-import prisma from "./prisma";
+import { prisma } from "./prisma";
 
 export async function fetchPosts() {
   // equivalent to doing fetch, cache: no-store

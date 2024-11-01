@@ -1,6 +1,5 @@
 import { fetchPostById, fetchPostsByUsername } from "@/lib/data";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import PostsGrid from "./PostsGrid";
 
 async function MorePosts({ postId }: { postId: string }) {

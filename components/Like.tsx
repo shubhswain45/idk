@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 import { Like } from "@prisma/client";
 import { Heart } from "lucide-react";
 import { useOptimistic } from "react";
-// import ActionIcon from "./ActionIcon";
-// import { likePost } from "@/lib/actions";
 import ActionIcon from "./ActionIcon";
 import { likePost } from "@/lib/actions";
 
@@ -22,9 +20,8 @@ function LikeButton({
 
   const [optimisticLikes, addOptimisticLike] = useOptimistic<Like[]>(
     post.likes,
-    // @ts-ignore
+    // @ts-expect-error - Intentional override for optimistic state update logic
     (state: Like[], newLike: Like) =>
-      // here we check if the like already exists, if it does, we remove it, if it doesn't, we add it
       state.some(predicate)
         ? state.filter((like) => like.userId !== userId)
         : [...state, newLike]
@@ -34,7 +31,7 @@ function LikeButton({
     <div className="flex flex-col">
       <form
         action={async (formData: FormData) => {
-          const postId = formData.get("postId");
+          const postId = formData.get("postId") as string;
           addOptimisticLike({ postId, userId });
 
           await likePost(postId);
