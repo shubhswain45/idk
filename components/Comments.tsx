@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Comment } from "@prisma/client";
 import { User } from "next-auth";
 import Link from "next/link";
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic } from "react"; // Removed useTransition since it's not used
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CreateComment } from "@/lib/schemas";
@@ -35,12 +35,9 @@ function Comments({
     },
   });
 
-  const [optimisticComments, addOptimisticComment] = useOptimistic<
-    CommentWithExtras[]
-  >(
+  const [optimisticComments, addOptimisticComment] = useOptimistic<CommentWithExtras[]>(
     comments,
-    // Replace @ts-ignore with @ts-expect-error
-    // @ts-expect-error
+    // @ts-expect-error This is required because we are using a custom state update
     (state: Comment[], newComment: string) => [
       { body: newComment, userId: user?.id, postId, user },
       ...state,
@@ -82,7 +79,7 @@ function Comments({
           onSubmit={form.handleSubmit(async (values) => {
             const valuesCopy = { ...values };
             form.reset();
-              addOptimisticComment(valuesCopy.body);
+            addOptimisticComment(valuesCopy.body);
 
             await createComment(valuesCopy);
           })}
@@ -91,7 +88,7 @@ function Comments({
           <FormField
             control={form.control}
             name="body"
-            render={({ field, fieldState }) => (
+            render={({ field }) => ( // Removed fieldState since it's not used
               <FormItem className="w-full flex">
                 <FormControl>
                   <input
