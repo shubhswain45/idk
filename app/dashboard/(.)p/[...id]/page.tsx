@@ -1,14 +1,16 @@
 import PostView from "@/components/PostView";
 import { fetchPostById } from "@/lib/data";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 
-type Props = {
-  params: {
-    id: string;
-  };
-};
+async function PostModal() {
+  const { id } = useParams();
 
-async function PostModal({ params: { id } }: Props) {
+  // Check if id is valid and is a string
+  if (!id || Array.isArray(id)) {
+    notFound();
+    return null; // Return null to ensure the function exits if id is invalid
+  }
+
   const post = await fetchPostById(id);
 
   if (!post) {
